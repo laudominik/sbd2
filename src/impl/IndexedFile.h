@@ -2,9 +2,8 @@
 
 
 #include <impl/Record.h>
-#include <impl/Index.h>
-#include <impl/Data.h>
 #include <util/Constants.h>
+#include <generic/File.h>
 
 
 namespace sbd::impl {
@@ -21,9 +20,10 @@ namespace sbd::impl {
 
     private:
         void allocateDiskSpace();
-        Index index;
-        Data data;
-
+//        Index index;
+//        Data data;
+        generic::File<IndexRecord> index;
+//        generic::File<DataRecord> data;
     };
 }
 

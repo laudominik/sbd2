@@ -36,6 +36,10 @@ namespace sbd::impl {
             return ptr;
         }
 
+        virtual bool isInvalid(){
+            return key == constants::INCORRECT_RECORD_KEY && ptr == constants::INCORRECT_RECORD_KEY;
+        }
+
     protected:
         generic::key_t key{};
         generic::pointer_t ptr{};
