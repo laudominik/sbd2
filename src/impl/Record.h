@@ -11,7 +11,16 @@
 namespace sbd::impl {
     class Record {
     public:
+        Record(generic::key_t key, generic::pointer_t ptr): key(key), ptr(ptr){}
+        Record() = default;
+
         [[nodiscard]] virtual std::vector<uint8_t> serialize() const;
+
+        static size_t size(){
+            return constants::HEADER_SIZE;
+        }
+
+        static Record deserialize(std::vector<uint8_t>& bytes, uint64_t offset = 0);
 
         void setKey(generic::key_t key_){
             key = key_;
@@ -28,14 +37,16 @@ namespace sbd::impl {
         }
 
     protected:
-        generic::key_t key;
-        generic::pointer_t ptr;
+        generic::key_t key{};
+        generic::pointer_t ptr{};
 
     };
 
     class DataRecord : public Record {
 
     public:
+        DataRecord(generic::key_t key, generic::pointer_t ptr, std::string data) : Record(key, ptr), data(std::move(data)) {};
+        DataRecord() = default;
         [[nodiscard]] std::vector<uint8_t> serialize() const override;
         static DataRecord deserialize(std::vector<uint8_t>& bytes, uint64_t offset = 0);
 
@@ -44,6 +55,10 @@ namespace sbd::impl {
         }
         [[nodiscard]] std::string getData() const {
             return data;
+        }
+
+        static size_t size(){
+            return constants::DATA_RECORD_SIZE;
         }
     protected:
         std::string data;

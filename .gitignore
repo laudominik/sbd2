@@ -37,8 +37,7 @@ cmake-build-debug
 *.out
 *.app
 .vs
-data/maintape
-data/temptape1
-data/temptape2
+data/index
+data/data
 reports/zadanie1.synctex.gz
 .DS_Store

@@ -32,3 +32,11 @@ std::vector<uint8_t> sbd::impl::Record::serialize() const {
     bytes.push_back((ptr >> 24) & 0xFF);
     return bytes;
 }
+
+sbd::impl::Record sbd::impl::Record::deserialize(std::vector<uint8_t> &bytes, uint64_t offset) {
+    Record deserialized;
+    auto begin = bytes.begin() + offset;
+    deserialized.key = (*begin) + (*(begin + 1) << 8) + (*(begin + 2) << 16) + (*(begin + 3) << 24);
+    deserialized.ptr = *(begin + 4) + (*(begin + 5) << 8) + (*(begin + 6) << 16) + (*(begin + 7) << 24);
+    return deserialized;
+}

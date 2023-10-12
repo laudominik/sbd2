@@ -1,12 +1,29 @@
 #pragma once
 
-#include "Record.h"
-#include <File.h>
+
+#include <impl/Record.h>
+#include <impl/Index.h>
+#include <impl/Data.h>
+#include <util/Constants.h>
+
 
 namespace sbd::impl {
     class IndexedFile {
-        generic::File<IndexRecord> index;
-        generic::File<DataRecord> data;
+    public:
+        IndexedFile();
+
+        /*
+         * basic operations
+         */
+        void update(const Record& record);
+        Record find(generic::key_t);
+        void add(const Record& record);
+
+    private:
+        void allocateDiskSpace();
+        Index index;
+        Data data;
+
     };
 }
 

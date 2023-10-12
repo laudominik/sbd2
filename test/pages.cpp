@@ -4,6 +4,10 @@ class PagesTest : public testing::Test {
 
 };
 
+TEST_F(PagesTest, testCreateFile){
+
+}
+
 TEST_F(PagesTest, testAddRecord){
 
 }
