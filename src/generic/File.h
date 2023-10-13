@@ -55,6 +55,7 @@ namespace sbd::generic {
             }
             cachedPage.data[*pos] = record;
             cachedPage.dirty = true;
+            numberOfRecords++;
         }
 
         struct page_t {

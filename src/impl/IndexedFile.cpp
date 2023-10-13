@@ -8,12 +8,10 @@ namespace sbd::impl {
     IndexedFile::IndexedFile(): index(constants::INDEX_FILE), data(constants::DATA_FILE_NAME) {
         clear();
 
-        // full pages closest to this number \|
-        // startOfOverflowArea = static_cast<size_t>(static_cast<double>(data.maxSize()) * (1.0-constants::OVERFLOW_RATIO));
-        // startOfOverflowArea = currentOverflowEndIx;
-
+        // evenly distribute the key values on pages
+        static constexpr auto DISTANCE = constants::MAX_RECORD_KEY / constants::INITIAL_PAGES_COUNT;
         for(auto pageNumber = 0u; pageNumber < constants::INITIAL_PAGES_COUNT; pageNumber++){
-            index.push_back(IndexRecord(constants::INCORRECT_RECORD_KEY, pageNumber));
+            index.push_back(IndexRecord(pageNumber * DISTANCE, pageNumber));
             data.appendEmptyPage();
         }
 
@@ -48,23 +46,22 @@ namespace sbd::impl {
         // assert (primary area not full)
 
         // handle empty page
-        if(indexRecord.getKey() == constants::INCORRECT_RECORD_KEY){
+        if(data.get(posInData).getKey() == constants::INCORRECT_RECORD_KEY){
             IndexRecord newIndexRecord{indexRecord};
             newIndexRecord.setKey(key);
             index.insert(posInIndex, newIndexRecord);
 
             DataRecord newDataRecord{key, constants::INCORRECT_RECORD_KEY, value};
             data.insert(posInData, newDataRecord);
+            postInsertJob();
             return;
         }
-
-        // TODO: handle last page (so that it doesn't overlap with overflow area)
 
         // find suitable position for record
         auto posOnPage = 0u;
         bool smallest = true;
         for(auto i = 0u; i < constants::DATA_RECORD_PER_PAGE; i++){
-            auto checkedRecord = data.get(i);
+            auto checkedRecord = data.get(i + posInData);
             if(checkedRecord.getKey() < key){
                 smallest = false;
                 posOnPage = i;
