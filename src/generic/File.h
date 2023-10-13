@@ -38,6 +38,7 @@ namespace sbd::generic {
             loadPageToCache(pageNum);
             cachedPage.data[ixOnPage] = record;
             cachedPage.dirty = true;
+            numberOfRecords++;
         }
 
         // add record to the last block of the file, if it's full then create new block and add it here!
@@ -101,9 +102,23 @@ namespace sbd::generic {
             time::writeClock().tick();
         }
 
+        size_t size(){
+            return numberOfRecords;
+        }
+
+        size_t maxSize(){
+            const auto recordsPerPage = constants::PAGE_SIZE / RECORD_T::size() ;
+            return numberOfPages * recordsPerPage;
+        }
+
+        bool isFull(){
+            return numberOfPages == maxSize();
+        }
+
     private:
         std::string filename;
         size_t numberOfPages{0};
+        size_t numberOfRecords{0};
 
         std::pair<size_t, size_t> getPageForRecordIndex(size_t ix) const {
             const auto recordsPerPage = constants::PAGE_SIZE / RECORD_T::size() ;
