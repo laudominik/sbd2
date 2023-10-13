@@ -20,8 +20,11 @@ namespace sbd::generic {
     class File {
     public:
         explicit File(std::string filename): filename(std::move(filename)){
-            std::filesystem::path p{this->filename};
-            numberOfPages = std::filesystem::file_size(p) / constants::PAGE_SIZE;
+            reset();
+        }
+
+        ~File(){
+            flushCachedPage();
         }
 
         RECORD_T get(size_t ix){
@@ -30,7 +33,7 @@ namespace sbd::generic {
             return cachedPage.data[ixOnPage];
         }
 
-        RECORD_T insert(size_t ix, const RECORD_T& record){
+        void insert(size_t ix, RECORD_T record){
             auto [pageNum, ixOnPage] = getPageForRecordIndex(ix);
             loadPageToCache(pageNum);
             cachedPage.data[ixOnPage] = record;
@@ -48,7 +51,6 @@ namespace sbd::generic {
                 addEmptyPage();
                 loadPageToCache(numberOfPages - 1);
                 pos = 0;
-                return;
             }
             cachedPage.data[*pos] = record;
             cachedPage.dirty = true;
@@ -60,6 +62,19 @@ namespace sbd::generic {
             mutable bool dirty{true};
             bool isPresent{false};
         } cachedPage;
+
+        void appendEmptyPage() {
+            addEmptyPage();
+        }
+
+        void reset(){
+            cachedPage.dirty = false;
+            cachedPage.data.clear();
+            cachedPage.isPresent = false;
+            cachedPage.index = 0;
+            std::filesystem::path p{this->filename};
+            numberOfPages = std::filesystem::file_size(p) / constants::PAGE_SIZE;
+        }
 
         void flushCachedPage() const {
             if(!cachedPage.dirty || !cachedPage.isPresent) return;

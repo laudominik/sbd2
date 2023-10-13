@@ -7,10 +7,9 @@
 using namespace sbd;
 
 int main(){
-
-    impl::IndexedFile indexedFile;
-
-    std::cout << time::readClock().get() << std::endl;
-    std::cout << time::writeClock().get() << std::endl;
+     impl::IndexedFile indexedFile;
+     indexedFile.insert(1, "GSL2137");
+//     indexedFile.insert(5, "GSL2138");
+//     indexedFile.insert(8, "GSL2139");
 
 }

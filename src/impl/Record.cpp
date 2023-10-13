@@ -5,6 +5,9 @@ std::vector<uint8_t> sbd::impl::DataRecord::serialize() const {
     std::transform(data.begin(), data.end(), std::back_inserter(bytes), [](const char& c) {
         return static_cast<uint8_t>(c);
     });
+    while(bytes.size() != constants::DATA_RECORD_SIZE){
+        bytes.push_back(0x0);
+    }
     return bytes;
 }
 
@@ -16,6 +19,9 @@ sbd::impl::DataRecord sbd::impl::DataRecord::deserialize(std::vector<uint8_t> &b
     deserialized.data = std::string(
             begin + constants::HEADER_SIZE,
             begin + constants::HEADER_SIZE + constants::DATA_SIZE);
+
+    deserialized.data = deserialized.data.substr(0, deserialized.data.find('\xFF'));
+
     return deserialized;
 }
 

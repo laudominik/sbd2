@@ -49,7 +49,7 @@ namespace sbd::impl {
     class DataRecord : public Record {
 
     public:
-        DataRecord(generic::key_t key, generic::pointer_t ptr, std::string data) : Record(key, ptr), data(std::move(data)) {};
+        DataRecord(generic::key_t key, generic::pointer_t ptr, const std::string& data) : Record(key, ptr), data(data) {};
         DataRecord() = default;
         [[nodiscard]] std::vector<uint8_t> serialize() const override;
         static DataRecord deserialize(std::vector<uint8_t>& bytes, uint64_t offset = 0);

@@ -14,16 +14,20 @@ namespace sbd::impl {
         /*
          * basic operations
          */
+        Record find(generic::key_t key);
+        void remove(generic::key_t key);
         void update(const Record& record);
-        Record find(generic::key_t);
-        void add(const Record& record);
+        void insert(generic::key_t key, const std::string& value);
+        void reorganise();
+        void clear();
 
     private:
         void allocateDiskSpace();
-//        Index index;
-//        Data data;
+
+        std::pair<size_t, size_t> getPositionFromIndex(generic::key_t key);
+
         generic::File<IndexRecord> index;
-//        generic::File<DataRecord> data;
+        generic::File<DataRecord> data;
     };
 }
 
