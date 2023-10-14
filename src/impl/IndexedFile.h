@@ -10,6 +10,7 @@ namespace sbd::impl {
     class IndexedFile {
     public:
         IndexedFile();
+        IndexedFile(size_t numberOfPrimaryPages);
 
         /*
          * basic operations

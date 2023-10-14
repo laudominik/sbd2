@@ -5,21 +5,23 @@
 #include <util/Constants.h>
 
 namespace sbd::impl {
-    IndexedFile::IndexedFile(): index(constants::INDEX_FILE), data(constants::DATA_FILE_NAME) {
+    IndexedFile::IndexedFile(): IndexedFile::IndexedFile(constants::INITIAL_PAGES_COUNT) {}
+
+    IndexedFile::IndexedFile(size_t numberOfPrimaryPages): index(constants::INDEX_FILE), data(constants::DATA_FILE_NAME) {
         clear();
 
         // evenly distribute the key values on pages
-        static constexpr auto DISTANCE = constants::MAX_RECORD_KEY / constants::INITIAL_PAGES_COUNT;
-        for(auto pageNumber = 0u; pageNumber < constants::INITIAL_PAGES_COUNT; pageNumber++){
+        static const auto DISTANCE = constants::MAX_RECORD_KEY / numberOfPrimaryPages;
+        for(auto pageNumber = 0u; pageNumber < numberOfPrimaryPages; pageNumber++){
             index.push_back(IndexRecord(pageNumber * DISTANCE, pageNumber));
             data.appendEmptyPage();
         }
 
-        static const auto OVERFLOW_PAGES_AMOUNT = static_cast<size_t>(ceil(constants::INITIAL_PAGES_COUNT * constants::OVERFLOW_RATIO));
+        static const auto OVERFLOW_PAGES_AMOUNT = static_cast<size_t>(ceil(numberOfPrimaryPages * constants::OVERFLOW_RATIO));
         for(auto pageNumber = 0u; pageNumber < OVERFLOW_PAGES_AMOUNT; pageNumber++){
             data.appendEmptyPage();
         }
-        currentOverflowEndIx = constants::INITIAL_PAGES_COUNT * constants::DATA_RECORD_PER_PAGE;
+        currentOverflowEndIx = numberOfPrimaryPages * constants::DATA_RECORD_PER_PAGE;
 
         index.flushCachedPage();
         data.flushCachedPage();
@@ -100,6 +102,7 @@ namespace sbd::impl {
 
     // gets index of first record of suitable page in DATA FILE and index of the corresponding record in INDEX FILE
     std::pair<size_t, size_t> IndexedFile::getPositionFromIndex(generic::key_t key) {
+        // TODO: change to bisection
         size_t posInIndex{}, posInData{};
         for(auto i = 0u; i < index.size(); i++){
             auto checkedRecord = index.get(i);
