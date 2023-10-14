@@ -15,7 +15,7 @@ namespace sbd::impl {
         /*
          * basic operations
          */
-        Record find(generic::key_t key);
+        std::string find(generic::key_t key);
         void remove(generic::key_t key);
         void update(const Record& record);
         void insert(generic::key_t key, const std::string& value);
@@ -25,7 +25,7 @@ namespace sbd::impl {
 
     private:
         void allocateDiskSpace();
-        void find0(generic::key_t key);
+        std::optional<size_t> find0(generic::key_t key);
 
         void addToChain(generic::key_t key, const std::string value, size_t indexIx, size_t dataIx);
 

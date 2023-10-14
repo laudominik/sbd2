@@ -119,7 +119,7 @@ namespace sbd::impl {
         size_t posInIndex{}, posInData{};
         for(auto i = 0u; i < primaryPages; i++){
             auto checkedRecord = index.get(i);
-            if(checkedRecord.getKey() < key){
+            if(checkedRecord.getKey() <= key){
                 posInIndex = i;
                 posInData = checkedRecord.getPtr() * constants::DATA_RECORD_PER_PAGE;
             }
@@ -250,7 +250,45 @@ namespace sbd::impl {
         reorganise(constants::REORGANISATION_ALPHA);
     }
 
-    void IndexedFile::find0(generic::key_t key) {
+    std::optional<size_t> IndexedFile::find0(generic::key_t key) {
+        auto [posInIndex, posInData] = getPositionFromIndex(key);
 
+        size_t posOnPage;
+        bool smallest = true;
+        for(auto i = 0u; i < constants::DATA_RECORD_PER_PAGE; i++){
+            auto checkedRecord = data.get(i + posInData);
+            if(checkedRecord.getKey() < key){
+                smallest = false;
+                posOnPage = i;
+            }
+            if(checkedRecord.getKey() == key){
+                // LOG this case
+                return i + posInData;
+            }
+        }
+        if(smallest){
+            return std::nullopt;
+        }
+
+        auto currentIx = posInData + posOnPage;
+        while(true){
+            auto currentRecord = data.get(currentIx);
+            if(currentRecord.getKey() == key){
+                return currentIx;
+            }
+            if(currentRecord.getPtr() == constants::INCORRECT_RECORD_KEY){
+                return std::nullopt;
+            }
+            currentIx = currentRecord.getPtr();
+        }
+    }
+
+    std::string IndexedFile::find(generic::key_t key) {
+        auto ix = find0(key);
+        if(!ix){
+            return "";
+        }
+
+        return data.get(*ix).getData();
     }
 }
