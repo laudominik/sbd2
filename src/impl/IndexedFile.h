@@ -10,7 +10,7 @@ namespace sbd::impl {
     class IndexedFile {
     public:
         IndexedFile();
-        IndexedFile(size_t numberOfPrimaryPages);
+        explicit IndexedFile(const std::string& indexFileName, const std::string& dataFileName, size_t numberOfPrimaryPages);
 
         /*
          * basic operations
@@ -20,10 +20,12 @@ namespace sbd::impl {
         void update(const Record& record);
         void insert(generic::key_t key, const std::string& value);
         void reorganise();
+        void reorganise(double alpha);
         void clear();
 
     private:
         void allocateDiskSpace();
+        void find0(generic::key_t key);
 
         void addToChain(generic::key_t key, const std::string value, size_t indexIx, size_t dataIx);
 
@@ -32,10 +34,10 @@ namespace sbd::impl {
         void postInsertJob();
         void appendToOverflowArea(generic::key_t key, const std::string& value, generic::pointer_t ptr = constants::INCORRECT_RECORD_KEY);
 
+        std::string indexFileName, dataFileName;
         generic::File<IndexRecord> index;
         generic::File<DataRecord> data;
-        size_t currentOverflowEndIx{0};
-        size_t startOfOverflowArea{0};
+        size_t currentOverflowEndIx, primaryPages, overflowPages, primaryRecords{}, overflowRecords{};
     };
 }
 

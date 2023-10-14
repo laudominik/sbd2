@@ -39,5 +39,9 @@ cmake-build-debug
 .vs
 data/index
 data/data
+data/tempData
+data/tempIndex
+data/temp_data
+data/temp_index
 reports/zadanie1.synctex.gz
 .DS_Store

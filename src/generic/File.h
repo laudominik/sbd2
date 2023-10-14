@@ -38,7 +38,6 @@ namespace sbd::generic {
             loadPageToCache(pageNum);
             cachedPage.data[ixOnPage] = record;
             cachedPage.dirty = true;
-            numberOfRecords++;
         }
 
         // add record to the last block of the file, if it's full then create new block and add it here!
@@ -55,7 +54,6 @@ namespace sbd::generic {
             }
             cachedPage.data[*pos] = record;
             cachedPage.dirty = true;
-            numberOfRecords++;
         }
 
         struct page_t {
@@ -75,7 +73,7 @@ namespace sbd::generic {
             cachedPage.isPresent = false;
             cachedPage.index = 0;
             std::filesystem::path p{this->filename};
-            numberOfPages = std::filesystem::file_size(p) / constants::PAGE_SIZE;
+            numberOfPages = std::filesystem::exists(p) ? std::filesystem::file_size(p) / constants::PAGE_SIZE : 0u;
         }
 
         void flushCachedPage() const {
@@ -103,10 +101,6 @@ namespace sbd::generic {
             time::writeClock().tick();
         }
 
-        size_t size(){
-            return numberOfRecords;
-        }
-
         size_t maxSize(){
             const auto recordsPerPage = constants::PAGE_SIZE / RECORD_T::size() ;
             return numberOfPages * recordsPerPage;
@@ -119,7 +113,6 @@ namespace sbd::generic {
     private:
         std::string filename;
         size_t numberOfPages{0};
-        size_t numberOfRecords{0};
 
         std::pair<size_t, size_t> getPageForRecordIndex(size_t ix) const {
             const auto recordsPerPage = constants::PAGE_SIZE / RECORD_T::size() ;
