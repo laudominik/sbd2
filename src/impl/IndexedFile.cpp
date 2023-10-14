@@ -115,15 +115,23 @@ namespace sbd::impl {
 
     // gets index of first record of suitable page in DATA FILE and index of the corresponding record in INDEX FILE
     std::pair<size_t, size_t> IndexedFile::getPositionFromIndex(generic::key_t key) {
-        // TODO: change to bisection
+        size_t left = 0;
+        size_t right = primaryPages - 1;
         size_t posInIndex{}, posInData{};
-        for(auto i = 0u; i < primaryPages; i++){
-            auto checkedRecord = index.get(i);
-            if(checkedRecord.getKey() <= key){
-                posInIndex = i;
-                posInData = checkedRecord.getPtr() * constants::DATA_RECORD_PER_PAGE;
+        while(left <= right){
+            auto mid = (left + right)/2;
+            auto currentRecord = index.get(mid);
+
+            if(currentRecord.getKey() <= key){
+                posInIndex = mid;
+                posInData = currentRecord.getPtr() * constants::DATA_RECORD_PER_PAGE;
+                left = mid + 1;
+            } else {
+                if(right == 0) break;
+                right = mid - 1;
             }
         }
+
         return {posInIndex, posInData};
     }
 
@@ -134,6 +142,9 @@ namespace sbd::impl {
 
             if(checkedRecord.getKey() == key){
                 // LOG this case
+
+                // no records were added so the counter shouldn't increment
+                overflowRecords--;
                 return;
             }
 

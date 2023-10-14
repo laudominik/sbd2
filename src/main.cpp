@@ -26,24 +26,25 @@ int main(){
     indexedFile.insert(10, "GSL2222");
     indexedFile.insert(11, "GSL6969");
     indexedFile.insert(2, "GSL0000");
-    indexedFile.insert(3, "GSLB00B");
-//    indexedFile.insert(0x55555588, "POGGERS");
-//    indexedFile.insert(0x06969690, "ABCD");
-//    indexedFile.insert(0x05555555, "LOLO <3");
-////
-//      indexedFile.insert(5, "XOXO");
-//      indexedFile.insert(8, "UVU");
-//      indexedFile.insert(6, "YOYO");
-//      indexedFile.insert(7, "XDD");
-//      indexedFile.insert(12, "LOLO1");
-//      indexedFile.insert(13, "LOLO2");
-////
-//      indexedFile.insert(15, "LOLO3");
-//      indexedFile.insert(16, "LOLO4");
-//      indexedFile.insert(17, "LOLO5");
-//      indexedFile.insert(18, "LOLO6");
-//      indexedFile.insert(20, "LOLO7");
-//      indexedFile.insert(19, "LOLO8");
+    //indexedFile.insert(3, "GSLB00B");
+    indexedFile.insert(0, "VXDDEEE");
+    indexedFile.insert(0x55555588, "POGGERS");
+    indexedFile.insert(0x06969690, "ABCD");
+    indexedFile.insert(0x05555555, "LOLO <3");
+//
+      indexedFile.insert(5, "XOXO");
+      indexedFile.insert(8, "UVU");
+      indexedFile.insert(6, "YOYO");
+      indexedFile.insert(7, "XDD");
+      indexedFile.insert(12, "LOLO1");
+      indexedFile.insert(13, "LOLO2");
+//
+      indexedFile.insert(15, "LOLO3");
+      indexedFile.insert(16, "LOLO4");
+      indexedFile.insert(17, "LOLO5");
+      indexedFile.insert(18, "LOLO6");
+      indexedFile.insert(20, "LOLO7");
+      indexedFile.insert(19, "LOLO8");
 
       auto y = indexedFile.find(3);
       auto z = indexedFile.find(19);
