@@ -17,7 +17,7 @@ namespace sbd::impl {
          */
         std::string find(generic::key_t key);
         void remove(generic::key_t key);
-        void update(const Record& record);
+        void update(generic::key_t key, generic::key_t newKey, const std::string& value);
         void insert(generic::key_t key, const std::string& value);
         void reorganise();
         void reorganise(double alpha);
@@ -37,7 +37,7 @@ namespace sbd::impl {
         std::string indexFileName, dataFileName;
         generic::File<IndexRecord> index;
         generic::File<DataRecord> data;
-        size_t currentOverflowEndIx, primaryPages, overflowPages, primaryRecords{}, overflowRecords{};
+        size_t currentOverflowEndIx, primaryPages, overflowPages, primaryRecords{}, overflowRecords{}, deletedRecords{};
     };
 }
 

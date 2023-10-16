@@ -118,6 +118,7 @@ namespace sbd::impl {
         size_t left = 0;
         size_t right = primaryPages - 1;
         size_t posInIndex{}, posInData{};
+        generic::key_t foundKey{constants::INCORRECT_RECORD_KEY};
         while(left <= right){
             auto mid = (left + right)/2;
             auto currentRecord = index.get(mid);
@@ -126,12 +127,16 @@ namespace sbd::impl {
                 posInIndex = mid;
                 posInData = currentRecord.getPtr() * constants::DATA_RECORD_PER_PAGE;
                 left = mid + 1;
+                foundKey = currentRecord.getKey();
             } else {
                 if(right == 0) break;
                 right = mid - 1;
             }
         }
 
+//        while(posInIndex > 0 && foundKey != constants::INCORRECT_RECORD_KEY && index.get(posInIndex-1).getKey() == foundKey){
+//            posInIndex--;
+//        }
         return {posInIndex, posInData};
     }
 
@@ -193,12 +198,10 @@ namespace sbd::impl {
 
     void IndexedFile::reorganise(double alpha) {
         const size_t maxRecordsPerPage = floor(constants::DATA_RECORD_PER_PAGE * alpha);
-        const size_t snew = ceil(static_cast<double>(primaryRecords + overflowRecords) / static_cast<double>(maxRecordsPerPage));
+        const size_t snew = ceil(static_cast<double>(primaryRecords + overflowRecords - deletedRecords) / static_cast<double>(maxRecordsPerPage));
 
         {
             IndexedFile tempFile(constants::TEMP_INDEX_FILE_NAME, constants::TEMP_DATA_FILE_NAME, snew);
-
-            const size_t allRecordsCount = (primaryPages + overflowPages) * constants::DATA_RECORD_PER_PAGE;
 
             size_t recordsOnCurrentPage = 0u;
             size_t currentPage = 0u;
@@ -206,7 +209,7 @@ namespace sbd::impl {
             size_t currentRecordIx = 0u;
             size_t currentPrimaryRecordIx = 0u;
 
-            while (processedRecords != primaryRecords + overflowRecords) {
+            while (processedRecords != primaryRecords + overflowRecords - deletedRecords) {
                 auto currentRecord = data.get(currentRecordIx);
                 auto key = currentRecord.getKey();
                 auto ptr = currentRecord.getPtr();
@@ -302,4 +305,116 @@ namespace sbd::impl {
 
         return data.get(*ix).getData();
     }
+
+    void IndexedFile::remove(generic::key_t key) {
+        const auto [posInIndex, posInData] = getPositionFromIndex(key);
+
+        size_t posOnPage = 0;
+        bool smallest = true;
+
+        for(auto i = 0u; i < constants::DATA_RECORD_PER_PAGE; i++){
+            auto checkedRecord = data.get(i + posInData);
+            if(checkedRecord.getKey() <= key){
+                smallest = false;
+                posOnPage = i;
+            }
+        }
+
+        if(smallest){
+            // key not present
+            return;
+        }
+
+        auto currentPos = posOnPage + posInData;
+
+        auto currentRecord = data.get(currentPos);
+        if(currentRecord.getKey() == key){
+            if(currentRecord.getPtr() == constants::INCORRECT_RECORD_KEY){
+                // shift entire page to the left
+                for(auto i = posOnPage; i < constants::DATA_RECORD_PER_PAGE-1; i++){
+                    data.insert(i+posInData, data.get(i+posInData+1));
+                }
+
+                // corner case, we should handle empty pages
+//                bool pageEmpty = true;
+//                for(auto i = 0u; i < constants::DATA_RECORD_PER_PAGE; i++){
+//                    if(data.get(i).getKey() != constants::INCORRECT_RECORD_KEY){
+//                        pageEmpty = false;
+//                    }
+//                }
+//
+//                if(pageEmpty){
+//
+//                    // TODO: index should have a value set to
+//                }
+                data.insert(posInData + constants::DATA_RECORD_PER_PAGE - 1, {constants::INCORRECT_RECORD_KEY, constants::INCORRECT_RECORD_KEY, ""});
+
+                // update index
+                index.insert(posInIndex, {data.get(posInData).getKey(), index.get(posInIndex).getPtr()});
+                deletedRecords++;
+
+                // TODO: handle case of page getting empty
+                // explanation: if the page gets empty then it will probably cause searching index to fail, ignoring it for now
+
+                return;
+            } else {
+                auto nextRecord = data.get(currentRecord.getPtr());
+                /*
+                 * it leaks memory under address of getPtr() but we're ok with that, it's gonna get freed on reorganisation
+                 */
+                data.insert(currentPos, nextRecord);
+                index.insert(posInIndex, {data.get(posInData).getKey(), index.get(posInIndex).getPtr()});
+                deletedRecords++;
+                return;
+            }
+        }
+
+        if(currentRecord.getPtr() == constants::INCORRECT_RECORD_KEY){
+            // key not present
+            return;
+        }
+
+
+        // key may be somewhere in overflow
+        auto previousPos = currentPos;
+        currentPos = currentRecord.getPtr();
+
+        while (true){
+            currentRecord = data.get(currentPos);
+            if(currentRecord.getKey() == key){
+                /*
+                 * it leaks memory under currentPos, but it will get freed
+                 */
+                auto previousRecord = data.get(previousPos);
+                previousRecord.setPtr(currentRecord.getPtr());
+                data.insert(previousPos, previousRecord);
+                deletedRecords++;
+                return;
+            }
+
+            previousPos = currentPos;
+            currentPos = currentRecord.getPtr();
+            if(currentPos == constants::INCORRECT_RECORD_KEY){
+                // key not present
+                return;
+            }
+        }
+    }
+
+    // TODO: test it
+    void IndexedFile::update(generic::key_t key, generic::key_t newKey, const std::string &value) {
+        if(key == newKey){
+            // just update
+            auto ix = find0(key);
+            if(!ix){
+                // LOG that
+                return;
+            }
+            // setup
+            return;
+        }
+        remove(key);
+        insert(newKey, value);
+    }
+
 }

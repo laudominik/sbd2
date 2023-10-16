@@ -8,7 +8,7 @@ using namespace sbd;
 
 /*
  * TODO:
- * - update, delete
+ * - update
  * - random generation/from file/from stdin
  * - find bugs
  * - improve number of reads (unnecessary reads/writes in file creation and reorganisation)
@@ -46,9 +46,23 @@ int main(){
       indexedFile.insert(20, "LOLO7");
       indexedFile.insert(19, "LOLO8");
 
-      auto y = indexedFile.find(3);
-      auto z = indexedFile.find(19);
-      auto t = indexedFile.find(0x55555588);
-      auto p = indexedFile.find(2);
+//      auto y = indexedFile.find(3);
+//      auto z = indexedFile.find(19);
+//      auto t = indexedFile.find(0x55555588);
+//      auto p = indexedFile.find(2);
+//        indexedFile.remove(19);
+//        indexedFile.reorganise();
+//        indexedFile.remove(0x55555588);
+//        indexedFile.reorganise();
+//        indexedFile.remove(0);
+//        indexedFile.remove(1);
+        indexedFile.remove(2);
+//        indexedFile.reorganise();
 
+//        indexedFile.insert(3, "bruuh");
+//        indexedFile.remove(2);
+        //indexedFile.reorganise();
+//        indexedFile.remove(0);
+//        indexedFile.remove(1);
+//        indexedFile.reorganise();
 }
