@@ -49,7 +49,7 @@ namespace sbd::impl {
         data.reset();
     }
 
-    void IndexedFile::insert(generic::key_t key, const std::string& value) {
+    bool IndexedFile::insert(generic::key_t key, const std::string& value) {
         auto [posInIndex, posInData] = getPositionFromIndex(key);
         auto indexRecord = index.get(posInIndex);
 
@@ -65,7 +65,7 @@ namespace sbd::impl {
             data.insert(posInData, newDataRecord);
             primaryRecords++;
             postInsertJob();
-            return;
+            return true;
         }
 
         // find suitable position for record
@@ -79,7 +79,7 @@ namespace sbd::impl {
             }
             if(checkedRecord.getKey() == key){
                 // LOG this case
-                return;
+                return false;
             }
         }
 
@@ -90,7 +90,7 @@ namespace sbd::impl {
             index.insert(posInIndex, indexRecord);
             postInsertJob();
             overflowRecords++;
-            return;
+            return true;
         }
 
         posOnPage++;
@@ -111,6 +111,7 @@ namespace sbd::impl {
         }
 
         postInsertJob();
+        return true;
     }
 
     // gets index of first record of suitable page in DATA FILE and index of the corresponding record in INDEX FILE
@@ -306,7 +307,7 @@ namespace sbd::impl {
         return data.get(*ix).getData();
     }
 
-    void IndexedFile::remove(generic::key_t key) {
+    bool IndexedFile::remove(generic::key_t key) {
         const auto [posInIndex, posInData] = getPositionFromIndex(key);
 
         size_t posOnPage = 0;
@@ -322,7 +323,7 @@ namespace sbd::impl {
 
         if(smallest){
             // key not present
-            return;
+            return false;
         }
 
         auto currentPos = posOnPage + posInData;
@@ -356,7 +357,7 @@ namespace sbd::impl {
                 // TODO: handle case of page getting empty
                 // explanation: if the page gets empty then it will probably cause searching index to fail, ignoring it for now
 
-                return;
+                return true;
             } else {
                 auto nextRecord = data.get(currentRecord.getPtr());
                 /*
@@ -365,13 +366,13 @@ namespace sbd::impl {
                 data.insert(currentPos, nextRecord);
                 index.insert(posInIndex, {data.get(posInData).getKey(), index.get(posInIndex).getPtr()});
                 deletedRecords++;
-                return;
+                return true;
             }
         }
 
         if(currentRecord.getPtr() == constants::INCORRECT_RECORD_KEY){
             // key not present
-            return;
+            return false;
         }
 
 
@@ -389,19 +390,18 @@ namespace sbd::impl {
                 previousRecord.setPtr(currentRecord.getPtr());
                 data.insert(previousPos, previousRecord);
                 deletedRecords++;
-                return;
+                return true;
             }
 
             previousPos = currentPos;
             currentPos = currentRecord.getPtr();
             if(currentPos == constants::INCORRECT_RECORD_KEY){
                 // key not present
-                return;
+                return false;
             }
         }
     }
 
-    // TODO: test it
     void IndexedFile::update(generic::key_t key, generic::key_t newKey, const std::string &value) {
         if(key == newKey){
             // just update
@@ -411,10 +411,12 @@ namespace sbd::impl {
                 return;
             }
             // setup
+            auto record = data.get(*ix);
+            record.setData(value);
+            data.insert(*ix, record);
             return;
         }
-        remove(key);
-        insert(newKey, value);
+        remove(key) && insert(newKey, value);
     }
 
 }

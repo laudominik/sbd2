@@ -16,9 +16,9 @@ namespace sbd::impl {
          * basic operations
          */
         std::string find(generic::key_t key);
-        void remove(generic::key_t key);
+        bool remove(generic::key_t key);
         void update(generic::key_t key, generic::key_t newKey, const std::string& value);
-        void insert(generic::key_t key, const std::string& value);
+        bool insert(generic::key_t key, const std::string& value);
         void reorganise();
         void reorganise(double alpha);
         void clear();
