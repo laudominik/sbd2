@@ -11,9 +11,12 @@
 namespace sbd::time {
 	class Clock {
 	public:
-		void tick() { counter++; };
-		uint64_t get() { return counter; };
+		void tick() { if(!frozen) counter++; };
+		uint64_t get() { return counter; }
+        void freeze() { frozen = true; }
+        void unfreeze() { frozen = false; }
 	protected:
+        bool frozen = false;
 		uint64_t counter{0u};
 	};
 }

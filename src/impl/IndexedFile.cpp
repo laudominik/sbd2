@@ -419,4 +419,70 @@ namespace sbd::impl {
         remove(key) && insert(newKey, value);
     }
 
+    std::ostream &operator<<(std::ostream &os, IndexedFile& indexedFile) {
+        time::readClock().freeze();
+        time::writeClock().freeze();
+
+        indexedFile.data.flushCachedPage();
+        indexedFile.index.flushCachedPage();
+        generic::File<IndexRecord> index(indexedFile.indexFileName);
+        generic::File<DataRecord> data(indexedFile.dataFileName);
+        os << "___INDEXED__FILE___" << std::endl;
+        os << "-------INDEX-------" << std::endl;
+        auto indexPageCounter = 0;
+        for(auto i = 0u; i < indexedFile.primaryPages; i++){
+            if(i % (constants::PAGE_SIZE / constants::HEADER_SIZE) == 0){
+                os << "=======PAGE" << indexPageCounter <<"======"<< std::endl;
+                indexPageCounter++;
+            }
+            auto currentRecord = index.get(i);
+            os << "page: " << currentRecord.getPtr() << " key: " << currentRecord.getKey() << std::endl;
+        }
+        os << "-----INDEX-END-----" << std::endl << std::endl;
+        os << "------PRIMARY------" << std::endl;
+        auto primaryPageCounter = 0;
+        auto allPrimaryRecords = indexedFile.primaryPages * constants::DATA_RECORD_PER_PAGE;
+        for(auto i = 0u; i < allPrimaryRecords; i++){
+            if(i % constants::DATA_RECORD_PER_PAGE == 0){
+                os << "=======PAGE" << primaryPageCounter <<"======"<< std::endl;
+                primaryPageCounter++;
+            }
+            auto currentRecord = data.get(i);
+            if(currentRecord.getKey() == constants::INCORRECT_RECORD_KEY){
+                os <<"#" << i << " *******************" << std::endl;
+                continue;
+            }
+            os << "#" << i << " key: " << currentRecord.getKey() << " data: " << currentRecord.getData();
+            if (currentRecord.getPtr() != constants::INCORRECT_RECORD_KEY){
+                os << " ptr: " << currentRecord.getPtr();
+            }
+            os << std::endl;
+        }
+        os << "----PRIMARY-END----" << std::endl << std::endl;
+        os << "-----OVERFLOW------" << std::endl;
+        auto overflowPageCounter = 0;
+        auto allOverflowRecords = indexedFile.overflowPages * constants::DATA_RECORD_PER_PAGE;
+        for(auto i = allPrimaryRecords; i < allPrimaryRecords + allOverflowRecords; i++){
+            if(i % constants::DATA_RECORD_PER_PAGE == 0){
+                os << "=======PAGE" << overflowPageCounter <<"======"<< std::endl;
+                overflowPageCounter++;
+            }
+            auto currentRecord = data.get(i);
+            if(currentRecord.getKey() == constants::INCORRECT_RECORD_KEY){
+                os <<"#" << i << " *******************" << std::endl;
+                continue;
+            }
+            os << "#" << i << " key: " << currentRecord.getKey() << " data: " << currentRecord.getData();
+            if (currentRecord.getPtr() != constants::INCORRECT_RECORD_KEY){
+                os << " ptr: " << currentRecord.getPtr();
+            }
+            os << std::endl;
+        }
+        os << "----OVERFLOW-END---" << std::endl;
+
+        time::readClock().unfreeze();
+        time::writeClock().unfreeze();
+        return os;
+    }
+
 }

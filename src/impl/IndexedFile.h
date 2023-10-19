@@ -23,6 +23,7 @@ namespace sbd::impl {
         void reorganise(double alpha);
         void clear();
 
+        friend std::ostream& operator<<(std::ostream& os, IndexedFile& indexedFile);
     private:
         void allocateDiskSpace();
         std::optional<size_t> find0(generic::key_t key);

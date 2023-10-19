@@ -60,6 +60,8 @@ int main(){
         indexedFile.update(0x05555556,0x05555556, "ALSOHER");
         indexedFile.update(0, 69, "UPDAT69");
         indexedFile.update(18, 70, "LOLO6_2");
+
+        std::cout << indexedFile;
 //        indexedFile.reorganise();
 
 //        indexedFile.insert(3, "bruuh");
