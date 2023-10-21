@@ -420,17 +420,58 @@ namespace sbd::impl {
     }
 
     std::ostream &operator<<(std::ostream &os, IndexedFile& indexedFile) {
+        indexedFile.blockPrint(os);
+        return os;
+    }
+
+    void IndexedFile::inorderPrint(std::ostream& os) {
+        time::readClock().freeze();
+        time::writeClock().freeze();
+        os << "___INDEXED__FILE___" << std::endl;
+
+        size_t currentRecordIx = 0u;
+        size_t currentPrimaryRecordIx = 0u;
+        size_t processedRecords = 0u;
+        while (processedRecords != primaryRecords + overflowRecords - deletedRecords) {
+            auto currentRecord = data.get(currentRecordIx);
+            auto key = currentRecord.getKey();
+            auto ptr = currentRecord.getPtr();
+            auto value = currentRecord.getData();
+
+            if (currentRecord.getKey() == constants::INCORRECT_RECORD_KEY) {
+                currentPrimaryRecordIx++;
+                currentRecordIx = currentPrimaryRecordIx;
+                continue;
+            }
+
+            os << "#" << currentRecordIx << " key: " << currentRecord.getKey() << " data: " << currentRecord.getData() << std::endl;
+            processedRecords++;
+
+            // which record to process next
+            if (ptr == constants::INCORRECT_RECORD_KEY) {
+                currentPrimaryRecordIx++;
+                currentRecordIx = currentPrimaryRecordIx;
+            } else {
+                currentRecordIx = ptr;
+            }
+        }
+
+        time::readClock().unfreeze();
+        time::writeClock().unfreeze();
+    }
+
+    void IndexedFile::blockPrint(std::ostream &os) {
         time::readClock().freeze();
         time::writeClock().freeze();
 
-        indexedFile.data.flushCachedPage();
-        indexedFile.index.flushCachedPage();
-        generic::File<IndexRecord> index(indexedFile.indexFileName);
-        generic::File<DataRecord> data(indexedFile.dataFileName);
+        data.flushCachedPage();
+        index.flushCachedPage();
+        generic::File<IndexRecord> index(indexFileName);
+        generic::File<DataRecord> data(dataFileName);
         os << "___INDEXED__FILE___" << std::endl;
         os << "-------INDEX-------" << std::endl;
         auto indexPageCounter = 0;
-        for(auto i = 0u; i < indexedFile.primaryPages; i++){
+        for(auto i = 0u; i < primaryPages; i++){
             if(i % (constants::PAGE_SIZE / constants::HEADER_SIZE) == 0){
                 os << "=======PAGE" << indexPageCounter <<"======"<< std::endl;
                 indexPageCounter++;
@@ -441,7 +482,7 @@ namespace sbd::impl {
         os << "-----INDEX-END-----" << std::endl << std::endl;
         os << "------PRIMARY------" << std::endl;
         auto primaryPageCounter = 0;
-        auto allPrimaryRecords = indexedFile.primaryPages * constants::DATA_RECORD_PER_PAGE;
+        auto allPrimaryRecords = primaryPages * constants::DATA_RECORD_PER_PAGE;
         for(auto i = 0u; i < allPrimaryRecords; i++){
             if(i % constants::DATA_RECORD_PER_PAGE == 0){
                 os << "=======PAGE" << primaryPageCounter <<"======"<< std::endl;
@@ -461,7 +502,7 @@ namespace sbd::impl {
         os << "----PRIMARY-END----" << std::endl << std::endl;
         os << "-----OVERFLOW------" << std::endl;
         auto overflowPageCounter = 0;
-        auto allOverflowRecords = indexedFile.overflowPages * constants::DATA_RECORD_PER_PAGE;
+        auto allOverflowRecords = overflowPages * constants::DATA_RECORD_PER_PAGE;
         for(auto i = allPrimaryRecords; i < allPrimaryRecords + allOverflowRecords; i++){
             if(i % constants::DATA_RECORD_PER_PAGE == 0){
                 os << "=======PAGE" << overflowPageCounter <<"======"<< std::endl;
@@ -482,7 +523,6 @@ namespace sbd::impl {
 
         time::readClock().unfreeze();
         time::writeClock().unfreeze();
-        return os;
     }
 
 }

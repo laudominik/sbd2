@@ -22,6 +22,8 @@ namespace sbd::impl {
         void reorganise();
         void reorganise(double alpha);
         void clear();
+        void inorderPrint(std::ostream& os);
+        void blockPrint(std::ostream& os);
 
         friend std::ostream& operator<<(std::ostream& os, IndexedFile& indexedFile);
     private:
