@@ -4,6 +4,7 @@
 #include <impl/IndexedFile.h>
 #include <cli/Agent.h>
 #include <cli/InteractiveAgent.h>
+#include <cli/RandomAgent.h>
 #include <util/Config.h>
 #include <time/Measurement.h>
 
@@ -11,7 +12,7 @@ using namespace sbd;
 
 /*
  * TODO:
- * - random generation/from file
+ * - from file
  * - find bugs
  * - improve number of reads (unnecessary reads/writes in file creation and reorganisation)
  * - experiment
@@ -92,8 +93,14 @@ void cli(){
         std::cout << "[INFO] debug mode " << (util::Config::instance().isDebugModeEnabled() ? "true" : "false") << std::endl;
         std::cout << "CHOOSE INPUT TYPE: CLI/FILE/RANDOM, set/unsets DEBUG" << std::endl;
         std::cin >> choice;
-        if(choice == "CLI"){
+        if(choice == "CLI") {
             agent = std::make_unique<InteractiveAgent>();
+            break;
+        } else if(choice == "RANDOM"){
+            std::cout << "how many operations to generate?" << std::endl;
+            uint32_t n;
+            std::cin >> n;
+            agent = std::make_unique<RandomAgent>(n);
             break;
         } else if(choice == "DEBUG"){
             util::Config::instance().switchDebugMode();

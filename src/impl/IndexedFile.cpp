@@ -233,7 +233,10 @@ namespace sbd::impl {
 
     void IndexedFile::reorganise(double alpha) {
         const size_t maxRecordsPerPage = floor(constants::DATA_RECORD_PER_PAGE * alpha);
-        const size_t snew = ceil(static_cast<double>(primaryRecords + overflowRecords - deletedRecords) / static_cast<double>(maxRecordsPerPage));
+        size_t snew = ceil(static_cast<double>(primaryRecords + overflowRecords - deletedRecords) / static_cast<double>(maxRecordsPerPage));
+        if(snew == 0){
+            return;
+        }
 
         {
             IndexedFile tempFile(constants::TEMP_INDEX_FILE_NAME, constants::TEMP_DATA_FILE_NAME, snew);
@@ -429,7 +432,7 @@ namespace sbd::impl {
             previousPos = currentPos;
             currentPos = currentRecord.getPtr();
             if(currentPos == constants::INCORRECT_RECORD_KEY){
-                // key not present
+                logNoSuchKey(key);
                 return false;
             }
         }
