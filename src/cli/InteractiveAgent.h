@@ -1,7 +1,11 @@
 #pragma once
 
-#include <cli/Agent.h>
+#include <iostream>
 
-class InteractiveAgent : public Agent {
-    Choice makeChoice() override;
+#include <cli/Agent.h>
+#include <cli/IstreamAgent.h>
+
+class InteractiveAgent : public IstreamAgent {
+public:
+    InteractiveAgent(): IstreamAgent(std::cin) {};
 };
