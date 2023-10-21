@@ -4,5 +4,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${SOURCE_DIR})
 add_library(libsbd STATIC)
 target_include_directories(libsbd PUBLIC ${SOURCE_DIR} ${SOURCE_DIR}/generic)
 add_subdirectory(${SOURCE_DIR}/impl)
+add_subdirectory(${SOURCE_DIR}/cli)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE libsbd)

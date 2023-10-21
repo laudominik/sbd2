@@ -2,8 +2,18 @@
 
 #include <cmath>
 #include <utility>
+#include <iostream>
 
 #include <util/Constants.h>
+
+void logKeyAlreadyExists(uint32_t key){
+    std::cout << "[WARNING] record with key "<< key << " already exists, aborting..." << std::endl;
+}
+
+void logNoSuchKey(uint32_t key){
+    std::cout << "[WARNING] record with key "<< key << " not present in file, aborting..." << std::endl;
+}
+
 
 namespace sbd::impl {
     IndexedFile::IndexedFile(): IndexedFile(
@@ -78,7 +88,7 @@ namespace sbd::impl {
                 posOnPage = i;
             }
             if(checkedRecord.getKey() == key){
-                // LOG this case
+                logKeyAlreadyExists(key);
                 return false;
             }
         }
@@ -97,6 +107,33 @@ namespace sbd::impl {
         if(posOnPage < constants::DATA_RECORD_PER_PAGE ){
             // put it in empty place
             if(data.get(posOnPage + posInData).getKey() == constants::INCORRECT_RECORD_KEY){
+                // if there's a bigger element in the overflow chain, it should be added to the overflow
+
+                auto currentPos = data.get(posOnPage + posInData - 1).getPtr();
+                while(currentPos != constants::INCORRECT_RECORD_KEY){
+                    auto currentRecord = data.get(currentPos);
+                    if(currentRecord.getKey() < key){
+                        currentPos = currentRecord.getPtr();
+                        continue;
+                    }
+                    if(currentRecord.getKey() == key){
+                        logKeyAlreadyExists(key);
+                        return false;
+                    }
+
+                    impl::DataRecord newRecord(key, currentOverflowEndIx, value);
+
+                    appendToOverflowArea(
+                            currentRecord.getKey(),
+                            currentRecord.getData(),
+                            currentRecord.getPtr());
+
+                    data.insert(currentPos, newRecord);
+                    overflowRecords++;
+                    postInsertJob();
+                    return true;
+                }
+
                 data.insert(posOnPage + posInData, impl::DataRecord(key, constants::INCORRECT_RECORD_KEY, value));
                 primaryRecords++;
             } else {
@@ -135,9 +172,6 @@ namespace sbd::impl {
             }
         }
 
-//        while(posInIndex > 0 && foundKey != constants::INCORRECT_RECORD_KEY && index.get(posInIndex-1).getKey() == foundKey){
-//            posInIndex--;
-//        }
         return {posInIndex, posInData};
     }
 
@@ -147,7 +181,7 @@ namespace sbd::impl {
             auto checkedRecord = data.get(dataIx);
 
             if(checkedRecord.getKey() == key){
-                // LOG this case
+                logKeyAlreadyExists(key);
 
                 // no records were added so the counter shouldn't increment
                 overflowRecords--;
@@ -277,7 +311,6 @@ namespace sbd::impl {
                 posOnPage = i;
             }
             if(checkedRecord.getKey() == key){
-                // LOG this case
                 return i + posInData;
             }
         }
@@ -322,7 +355,7 @@ namespace sbd::impl {
         }
 
         if(smallest){
-            // key not present
+            logNoSuchKey(key);
             return false;
         }
 
@@ -407,7 +440,7 @@ namespace sbd::impl {
             // just update
             auto ix = find0(key);
             if(!ix){
-                // LOG that
+                logNoSuchKey(key);
                 return;
             }
             // setup
