@@ -170,9 +170,55 @@ konstruktorze zapisywany jest aktualny stan zegara a w destruktorze nowy stan ze
 wywołań funkcji \textit{tick} danego zegara. Ponadto pomiary te dodawane są do obiektu klasy \textit{MeasurementAggregate}, który umożliwia policzenie wartości średniej z zebranych próbek. \\\\
 \textbf{W przypadku testów przyjęto $b=50$ rekordów}.
 \subsection{Rozmiar a ilość rekordów}
+Pierwszym przeprowadzonym elementem było zbadanie zależności między ilością rekordów a rozmiarem pliku.  W tym celu przyjęto $\alpha = 0.5$ i przeprowadzono $N$ losowych operacji INSERT.
+\begin{center}
+\begin{tabular}{ c | c c c }
+ $N$ & rozmiar indeksu [B] & rozmiar obszaru głównego [B] & rozmiar obszaru przepełnienia [B]  \\ 
+\hline
+  10 & ? & ? & ? \\
+  50 & ? & ? & ? \\
+  100 & ? & ? & ? \\
+  500  & ? & ? & ? \\
+  1000 & ? & ? & ? \\
+  5000 & ? & ? & ? \\
+  10000 & ? & ? & ? \\
+\end{tabular}
+\end{center}
+TODO: wykres \\
+TODO: omówienie
 \subsection{Rozmiar a $\alpha$}
-W następnym eksperymencie przeprowadzono 1000 losowych operacji INSERT dla różnych współczynników średniego zapełnienia bloku i zbadano rozmiar 
+W następnym eksperymencie przeprowadzono 1000 losowych operacji INSERT dla różnych współczynników średniego zapełnienia bloku i zbadano końcowy rozmiar pliku
+\begin{center}
+\begin{tabular}{ c | c c c }
+ $\alpha$ & rozmiar indeksu [B] & rozmiar obszaru głównego [B] & rozmiar obszaru przepełnienia [B]  \\ 
+\hline
+  0.1 & ? & ? & ? \\
+   0.1 & ? & ? & ? \\
+  0.1 & ? & ? & ? \\
+  0.1 & ? & ? & ? \\
+  0.1 & ? & ? & ? \\
+  0.1 & ? & ? & ? \\
+  0.1 & ? & ? & ? \\
+  0.1 & ? & ? & ? 
+\end{tabular}
+\end{center}
+TODO: wykres \\
+TODO: omówienie
 \subsection{Ilość operacji}
+W kolejnym eksperymencie wstawiono wygenerowano 1000 losowych rekordów, przyjęto $\alpha=0.5$ a następnie badano działanie różnych przypadków aktualizacji/usuwania.
+\begin{center}
+\begin{tabular}{ c c | c c | c}
+ operacja & ilość operacji & średnia liczba zapisów & średnia liczba od czytów & średnia liczba operacji i/o \\ 
+\hline
+ wstawianie & 1000 & ? & ? & ? \\  
+ usuwanie ist. & 100 & ? & ? & ? \\
+ usuwanie nieist. & 100 & ? & ? & ? \\
+ aktualizowanie ist. & 100 & ? & ? & ?\\
+ aktualizowanie nieist. & 100 & ? & ?  & ?\\
+\end{tabular}
+\end{center}
+TODO: wykres \\
+TODO: omówienie
 \section{Podsumowanie}
 
 
