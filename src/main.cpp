@@ -14,8 +14,7 @@ using namespace sbd;
 
 /*
  * TODO:
- * - find bugs (1. empty page bugz, 2. RANDOM 1000 with seed 0 has some inconsistency)
- * - improve number of reads (unnecessary reads/writes in file creation and reorganisation)
+ * - find bugs
  * - experiment
  * - report
  */
@@ -96,4 +95,6 @@ void cli(){
         }
     }
     aggr.printReport();
+    indexedFile.reportSize(std::cout);
+
 }

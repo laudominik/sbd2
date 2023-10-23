@@ -20,7 +20,7 @@ Choice RandomAgent::makeChoice() {
         std::cout << "EXIT" << std::endl;
         return {.op=EXIT};
     }
-    auto y = random() % 4;
+    auto y = random() % 3;
     auto op = static_cast<Operation>(y);
 
     Choice choice;
@@ -54,5 +54,7 @@ Choice RandomAgent::makeChoice() {
 }
 
 RandomAgent::RandomAgent(uint32_t numOfOps): numOfOps(numOfOps) {
-    srand(0);
+    uint32_t seed = time(nullptr);
+    std::cout << "[INFO] seed: " << seed << std::endl;
+    srand(seed);
 }

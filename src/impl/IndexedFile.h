@@ -11,7 +11,6 @@ namespace sbd::impl {
     public:
         IndexedFile();
         explicit IndexedFile(const std::string& indexFileName, const std::string& dataFileName, size_t numberOfPrimaryPages);
-
         /*
          * basic operations
          */
@@ -24,10 +23,9 @@ namespace sbd::impl {
         void clear();
         void inorderPrint(std::ostream& os);
         void blockPrint(std::ostream& os);
-
+        void reportSize(std::ostream& os) const;
         friend std::ostream& operator<<(std::ostream& os, IndexedFile& indexedFile);
     private:
-        void allocateDiskSpace();
         std::optional<size_t> find0(generic::key_t key);
 
         void addToChain(generic::key_t key, const std::string value, size_t indexIx, size_t dataIx);

@@ -14,7 +14,8 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(sbd_test
         serialization.cpp
-        pages.cpp)
+        pages.cpp
+        perf2.cpp)
 
 target_link_libraries(
   sbd_test

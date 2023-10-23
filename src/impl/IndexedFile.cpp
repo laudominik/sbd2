@@ -168,6 +168,7 @@ namespace sbd::impl {
                 foundKey = currentRecord.getKey();
             } else {
                 if(right == 0) break;
+                if(mid == 0) break;
                 right = mid - 1;
             }
         }
@@ -371,28 +372,11 @@ namespace sbd::impl {
                 for(auto i = posOnPage; i < constants::DATA_RECORD_PER_PAGE-1; i++){
                     data.insert(i+posInData, data.get(i+posInData+1));
                 }
-
-                // corner case, we should handle empty pages
-//                bool pageEmpty = true;
-//                for(auto i = 0u; i < constants::DATA_RECORD_PER_PAGE; i++){
-//                    if(data.get(i).getKey() != constants::INCORRECT_RECORD_KEY){
-//                        pageEmpty = false;
-//                    }
-//                }
-//
-//                if(pageEmpty){
-//
-//                    // TODO: index should have a value set to
-//                }
                 data.insert(posInData + constants::DATA_RECORD_PER_PAGE - 1, {constants::INCORRECT_RECORD_KEY, constants::INCORRECT_RECORD_KEY, ""});
 
                 // update index
                 index.insert(posInIndex, {data.get(posInData).getKey(), index.get(posInIndex).getPtr()});
                 deletedRecords++;
-
-                // TODO: handle case of page getting empty
-                // explanation: if the page gets empty then it will probably cause searching index to fail, ignoring it for now
-
                 return true;
             } else {
                 auto nextRecord = data.get(currentRecord.getPtr());
@@ -479,8 +463,8 @@ namespace sbd::impl {
                 currentRecordIx = currentPrimaryRecordIx;
                 continue;
             }
-
             os << "#" << currentRecordIx << " key: " << currentRecord.getKey() << " data: " << currentRecord.getData() << std::endl;
+            //os << " key: " << currentRecord.getKey() << " data: " << currentRecord.getData() << std::endl;
             processedRecords++;
 
             // which record to process next
@@ -559,6 +543,16 @@ namespace sbd::impl {
 
         time::readClock().unfreeze();
         time::writeClock().unfreeze();
+    }
+
+    void IndexedFile::reportSize(std::ostream &os) const {
+        os << "$$$$$$$REPORT$$$$$$$$" << std::endl;
+        size_t ixPerPage = constants::PAGE_SIZE/constants::HEADER_SIZE;
+        size_t numOfPages = ceil(static_cast<double>(primaryPages) / static_cast<double>(ixPerPage));
+
+        os << "index.size       =" <<  numOfPages * constants::PAGE_SIZE <<"B" << std::endl;
+        os << "primary.size     =" << primaryPages * constants::PAGE_SIZE <<"B"<< std::endl;
+        os << "overflow.size    =" << overflowPages * constants::PAGE_SIZE << "B" << std::endl;
     }
 
 }
