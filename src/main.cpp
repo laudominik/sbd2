@@ -25,6 +25,7 @@ int main(){
     cli();
 }
 
+// RANDOM 20 SEED=1698056705
 void cli(){
     impl::IndexedFile indexedFile;
     std::unique_ptr<Agent> agent;
@@ -96,5 +97,11 @@ void cli(){
     }
     aggr.printReport();
     indexedFile.reportSize(std::cout);
-
+    std::cout << "Print file? [Y/N]" << std::endl;
+    std::string inp;
+    std::cin >> inp;
+    if(inp == "Y"){
+        indexedFile.inorderPrint(std::cout);
+        std::cout << indexedFile;
+    }
 }

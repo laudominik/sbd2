@@ -1,12 +1,17 @@
 #pragma once
 
+#define PREVIEW
+
 namespace sbd::constants {
     static constexpr auto INDEX_FILE = "index";
     static constexpr auto DATA_FILE_NAME = "data";
     static constexpr auto TEMP_INDEX_FILE_NAME = "temp_index";
     static constexpr auto TEMP_DATA_FILE_NAME = "temp_data";
-
+#ifdef PREVIEW
+    static constexpr auto PAGE_SIZE = 60ull;
+#else
     static constexpr auto PAGE_SIZE = 750ull;
+#endif
 	static constexpr auto DATA_SIZE = 7ull;
     static constexpr auto HEADER_SIZE = 8ull;
     static constexpr auto INITIAL_PAGES_COUNT = 3ull;

@@ -1,0 +1,181 @@
+\documentclass{article}
+
+\title{Indeksowa organizacja pliku}
+\author{Dominik Lau (188697)}
+
+\usepackage{blindtext}
+\usepackage{amsmath}
+\usepackage[utf8]{inputenc}
+\usepackage[polish]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{amssymb}
+\usepackage{esvect}
+\usepackage{graphicx}
+\usepackage{mathtools}
+\usepackage[margin=0.5in]{geometry}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+
+\graphicspath{ {./obrazy/} }
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\def\multiset#1#2{\ensuremath{\left(\kern-.3em\left(\genfrac{}{}{0pt}{}{#1}{#2}\right)\kern-.3em\right)}}
+
+\lstset{frame=tb,
+  language=C++,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+
+\begin{document}
+\maketitle
+
+\section{Wprowadzenie}
+Do zaimplementowania wybrałem indeksowo-sekwencyjną organizację pliku 
+Wylosowane przeze mnie typy rekordów to \textbf{numery rejestracyjne samochodów}. Implementacji
+dokonałem w języku C++.
+\section{Opis działania}
+\subsection{Struktura kodu}
+W moim rozwiązaniu stosuję:
+\begin{itemize}
+\item klasy rekordów indeksu i pliku z danymi, udostępniające narzędzia do serializacji
+\item klasę \textit{File} z pliku \textit{generic/File.h} zawierającą implementację
+pliku dyskowego o dostępie blokowym,  która obsługuje logikę zapisu/odczytu stron z pliku dyskowego tak,że
+dostęp do niego poprzez metody \textit{get} czy \textit{insert} są na podobieństwo dostępu do zwykłej tablicy w pamięci RAM. Struktura ta cache'uje strony, odczytuje i zapisuje tylko w przypadku konieczności jej wymiany (ponadto zapis następuje tylko w przypadku modyfikacji ``bitu`` \textit{dirty} na true)
+ \item klasę \textit{IndexedFile} udostępniającą m.in. metody \textit{remove, insert, update, reorganise} (o których więcej w następnym podpunkcie)
+ \item folder \textit{cli/} zawierający ``agenty`` - \textit{InteractiveAgent, RandomAgent, FileAgent} definiujące źródło wejścia do programu, odpowiednio z wiersza poleceń, losowe oraz z pliku
+\item folder \textit{time/} zawierający zegary i klasy pomiarowe do zliczania liczby operacji dyskowych
+\end{itemize}
+\subsection{Serializacja/deserializacja}
+Rekordy z pliku indeksowego składają się z dwóch 4-bajtowych pól (numer strony i klucz), których kolejne bajty umieszczam w pliku zgodnie z konwencją little endian. W przypadku rekordu z danymi mamy trzy pola do serializacji - klucz, wskaźnik na następny rekord w obszarze przepełnienia (jeśli następny taki rekord nie znajduje
+się w obszarze przepełnienia, to pole to ma wartość \textbf{0xFFFFFFFF}) oraz \textbf{7-bajtowe pole z danymi}. 
+\subsection{Operacje na pliku indeksowym}
+\begin{itemize}
+\item tworzenie (konstruktor) - oferuje możliwość podania ilości stron głównych do stworzenia, ilość
+	stron przeznaczonych na obszar przepełnienia to $\ceil{\text{il.  stron głównych} * 0.2}$. \textbf{Na początku działania programu tworzony jest plik o 3 stronach głównych} (a co za tym idzie jednej stronie na obszar przepełnienia).
+\item insert - wstawienie nowego rekordu - pierw algorytmem binary search \textbf{przeszukujemy indeks} w poszukiwaniu odpowiedniego bloku,  następnie \textbf{przeszukujemy blok w poszukiwaniu poprzednika} wstawianego klucza, jeśli nie możemy wstawić rekordu bezpośrednio za poprzednikiem (np. już jest tam jakiś rekord lub strona jest pełna),  \textbf{umieszczamy go w łańcuchu przepełnienia tego rekordu} 
+\item reorganise 
+\begin{enumerate}
+	\item tworzymy tymczasowy plik indeksowy z indeksami \textit{temp\_index i temp\_data}, z których plik data ma ilość głównych stron zgodną ze wzorem $\ceil{\frac{N+V}{b\cdot\alpha}}$,  gdzie $N,V$ - ilość odpowiednio  rekordów głównych i rekordów w przepełnieniu, $b$ - ilość rekordów danych na stronę, $\alpha$ - średnie zapełnienie strony po reorganizacji
+ plik tymczasowy index ma odpowiednią ilość stron tak, żeby zmieścić wskaźniki do tych wszystkich stron
+	\item \textbf{odwiedzamy kolejne rekordy zgodnie z kolejnością rosnących kluczy} (czyli bierzemy też po uwagę obszar przepełnienia) i umieszczamy je na kolejnych stronach nowego pliku respektując przy tym $\alpha$
+	\item zmieniamy pliki \textit{temp\_index i temp\_data} na \textit{data i index},  w ten sposób dane po reorganizacji przypisujemy do pliku indeksowego, na którym operujemy
+\end{enumerate}
+\item remove - znalezienie odpowiedniego miejsca w strukturze i usunięcie z niego rekordu, tutaj na miejsce, w którym był ten plik ``wciągamy`` następny z łańcucha przepełnienia
+\item update - \textbf{jeśli chcemy aktualizować klucz} dla danego rekordu to najpierw usuwamy go z pliku a następnie wstawiamy na nowo ze zmodyfikowanymi danymi; \textbf{jeśli aktualizujemy tylko dane} to pobieramy pozycję rekordu o danym kluczu i zmieniamy jego numer rejestracyjny
+\end{itemize}
+\section{Prezentacja wyników programu}
+\subsection{Menu wyboru źródła danych}
+Po włączeniu programu użytkownik ma do wyboru trzy tryby
+\begin{lstlisting}
+[INFO] debug mode false
+CHOOSE INPUT TYPE: CLI/FILE/RANDOM, set/unsets DEBUG
+\end{lstlisting}
+\begin{itemize}
+	\item CLI - tryb interaktywny
+	\item FILE <nazwa\_pliku> - dane z pliku o podanej nazwie
+	\item RANDOM <N> - generacja losowej ilości poleceń (INSERT/REMOVE/UPDATE)
+	\item DEBUG - włączenie wypisywania stanu pliku co każdą operację
+\end{itemize}
+Po zakończeniu dla każdego z tych plików użytkownik ma możliwość wypisania końcowej postaci pliku.
+\subsection{Menu interaktywne}
+Menu oferuje następujące komendy
+\begin{lstlisting}
+>>HELP
+INSERT <key> <value>
+REMOVE <key>
+UPDATE <key> <newKey> <newValue>
+REORGANISE
+INORDER
+EXIT
+\end{lstlisting}
+komenda INORDER oferuje wypisanie pliku zgodnie z kolejnością kluczy,
+oto przykładowe wywołanie komendy INSERT z wyłączonym trybem debug
+\begin{lstlisting}
+>>INSERT 3 GS2138
+[Measurement] r: 1 w: 0 io(r+w): 1
+\end{lstlisting}
+Otrzymujemy informacje o wykonanych zapisach i odczytach (0 zapisów, ponieważ rekord jest narazie w cache'u, 1 odczyt ponieważ strona z pliku indeksowego najwyraźniej nadal jest w cache).
+\subsection{Wypisywanie pliku}
+Są dwa sposoby, w jaki program wypisuje plik, pierwszy - wypisanie struktury pliku razem z pustymi miejscami i zaznaczeniem jaki rekord jest na której stronie, oto przykład
+\begin{lstlisting}
+___INDEXED__FILE___
+-------INDEX-------
+=======PAGE0======
+page: 0 key: 0
+page: 1 key: 98852148
+page: 2 key: 198206151
+-----INDEX-END-----
+
+------PRIMARY------
+=======PAGE0======
+#0 key: 0 data: BRUUUUH ptr: 14
+#1 key: 68030329 data: DEBUG69
+#2 *******************
+#3 *******************
+=======PAGE1======
+#4 key: 98852148 data: 4O353I3
+#5 *******************
+#6 *******************
+#7 *******************
+=======PAGE2======
+#8 key: 198206151 data: P5MP165
+#9 *******************
+#10 *******************
+#11 *******************
+----PRIMARY-END----
+
+-----OVERFLOW------
+=======PAGE0======
+#12 key: 68030327 data: BUP30QP ptr: 13
+#13 key: 68030328 data: DEBUG70
+#14 key: 35496734 data: K7302PD ptr: 12
+#15 *******************
+----OVERFLOW-END---
+\end{lstlisting}
+a oto wypisanie tego samego pliku zgodnie z kolejnością klucza
+\begin{lstlisting}
+___INDEXED__FILE___
+#0 key: 0 data: BRUUUUH
+#14 key: 35496734 data: K7302PD
+#12 key: 68030327 data: BUP30QP
+#13 key: 68030328 data: DEBUG70
+#1 key: 68030329 data: DEBUG69
+#4 key: 98852148 data: 4O353I3
+#8 key: 198206151 data: P5MP165
+\end{lstlisting}
+
+\section{Eksperyment}
+\subsection{Szczegóły implementacyjne}
+Kod przeprowadzonego eksperymentu umieściłem w pliku \textit{perf2.cpp} jako część biblioteki \textit{sbd\_test}. Test uruchamiany jest za pomocą frameworka do
+testowania gtest. W celu zliczania ilości operacji wejścia-wyjścia w \textit{libsbd} zdefiniowałem dwa zegary: 
+\textit{writeClock},oraz \textit{readClock}. W pomiarach wykorzystuję również klasę \textit{Measurement}, która zbiera pomiary na wzór paradygmatu RAII - w 
+konstruktorze zapisywany jest aktualny stan zegara a w destruktorze nowy stan zegara jest odejmowany od starego, w ten sposób otrzymuję liczbę
+wywołań funkcji \textit{tick} danego zegara. Ponadto pomiary te dodawane są do obiektu klasy \textit{MeasurementAggregate}, który umożliwia policzenie wartości średniej z zebranych próbek. \\\\
+\textbf{W przypadku testów przyjęto $b=50$ rekordów}.
+\subsection{Rozmiar a ilość rekordów}
+\subsection{Rozmiar a $\alpha$}
+W następnym eksperymencie przeprowadzono 1000 losowych operacji INSERT dla różnych współczynników średniego zapełnienia bloku i zbadano rozmiar 
+\subsection{Ilość operacji}
+\section{Podsumowanie}
+
+
+
+
+\end{document}

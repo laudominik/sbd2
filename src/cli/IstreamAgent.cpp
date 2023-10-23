@@ -33,7 +33,10 @@ Choice IstreamAgent::makeChoice() {
         } else if (command == "EXIT") {
             return {.op=EXIT};
         } else {
-            std::cout << "invalid command" << std::endl <<
+            if(command != "HELP"){
+                std::cout << "invalid command" << std::endl;
+            }
+            std::cout <<
                       "INSERT <key> <value>" << std::endl <<
                       "REMOVE <key>" << std::endl <<
                       "UPDATE <key> <newKey> <newValue>" << std::endl <<
