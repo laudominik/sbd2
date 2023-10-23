@@ -33,7 +33,6 @@ namespace sbd::time {
             std::cout << "INSERT    : reads.avg " << avgReads(INSERT) << " writes.avg " << avgWrites(INSERT) << std::endl;
             std::cout << "UPDATE    : reads.avg " << avgReads(UPDATE) << " writes.avg " << avgWrites(UPDATE) << std::endl;
             std::cout << "REMOVE    : reads.avg " << avgReads(REMOVE) << " writes.avg " << avgWrites(REMOVE) << std::endl;
-            std::cout << "REORGANISE: reads.avg " << avgReads(REORGANISE) << " writes.avg " << avgWrites(REORGANISE) << std::endl;
         }
 
     private:

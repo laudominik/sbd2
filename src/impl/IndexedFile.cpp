@@ -241,6 +241,7 @@ namespace sbd::impl {
 
         {
             IndexedFile tempFile(constants::TEMP_INDEX_FILE_NAME, constants::TEMP_DATA_FILE_NAME, snew);
+            generic::File<DataRecord> overflowCachedFile(constants::DATA_FILE_NAME);
 
             size_t recordsOnCurrentPage = 0u;
             size_t currentPage = 0u;
@@ -249,7 +250,14 @@ namespace sbd::impl {
             size_t currentPrimaryRecordIx = 0u;
 
             while (processedRecords != primaryRecords + overflowRecords - deletedRecords) {
-                auto currentRecord = data.get(currentRecordIx);
+                DataRecord currentRecord;
+
+                // disk io improvement - caching overflow page
+                if(currentRecordIx != currentPrimaryRecordIx){
+                    currentRecord = overflowCachedFile.get(currentRecordIx);
+                } else {
+                    currentRecord = data.get(currentRecordIx);
+                }
                 auto key = currentRecord.getKey();
                 auto ptr = currentRecord.getPtr();
                 auto value = currentRecord.getData();
