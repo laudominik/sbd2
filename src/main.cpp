@@ -84,6 +84,14 @@ void cli(){
                 case INORDER:
                     indexedFile.inorderPrint(std::cout);
                     break;
+                case GET:{
+                    time::Measurement meas(std::cout, aggr, GET);
+                    auto out = indexedFile.find(choice.uintArgKey);
+                    if(!out.empty()){
+                        std::cout << "value: " << out << std::endl;
+                    }
+                    break;
+                }
                 case REORGANISE: {
                     time::Measurement meas(std::cout, aggr, REORGANISE);
                     indexedFile.reorganise();

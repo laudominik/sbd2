@@ -346,6 +346,7 @@ namespace sbd::impl {
     std::string IndexedFile::find(generic::key_t key) {
         auto ix = find0(key);
         if(!ix){
+            logNoSuchKey(key);
             return "";
         }
 
@@ -444,7 +445,11 @@ namespace sbd::impl {
             data.insert(*ix, record);
             return;
         }
-        remove(key) && insert(newKey, value);
+        if(remove(key)){
+            insert(newKey, value);
+        } else {
+            logNoSuchKey(key);
+        }
     }
 
     std::ostream &operator<<(std::ostream &os, IndexedFile& indexedFile) {
@@ -561,6 +566,7 @@ namespace sbd::impl {
         os << "index.size       =" <<  numOfPages * constants::PAGE_SIZE <<"B" << std::endl;
         os << "primary.size     =" << primaryPages * constants::PAGE_SIZE <<"B"<< std::endl;
         os << "overflow.size    =" << overflowPages * constants::PAGE_SIZE << "B" << std::endl;
+        os << "total.size       =" << (numOfPages + primaryPages + overflowPages) * constants::PAGE_SIZE << "B"<< std::endl;
     }
 
 }

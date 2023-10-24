@@ -26,6 +26,10 @@ Choice IstreamAgent::makeChoice() {
             in >> newKey;
             in >> data;
             return {.op=UPDATE, .strArg=data, .uintArgKey=key, .uintArgNewKey=newKey};
+        } else if(command == "GET"){
+            uint32_t key;
+            in >> key;
+            return {.op=GET, .uintArgKey=key};
         } else if (command == "REORGANISE") {
             return {.op=REORGANISE};
         } else if (command == "INORDER") {
@@ -40,6 +44,7 @@ Choice IstreamAgent::makeChoice() {
                       "INSERT <key> <value>" << std::endl <<
                       "REMOVE <key>" << std::endl <<
                       "UPDATE <key> <newKey> <newValue>" << std::endl <<
+                      "GET <key>" << std::endl <<
                       "REORGANISE" << std::endl <<
                       "INORDER" << std::endl <<
                       "EXIT" << std::endl;

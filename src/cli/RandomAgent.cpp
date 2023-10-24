@@ -9,7 +9,7 @@ Choice RandomAgent::makeChoice() {
         std::cout << "EXIT" << std::endl;
         return {.op=EXIT};
     }
-    auto y = random() % 3;
+    auto y = random() % 4;
     auto op = static_cast<Operation>(y);
 
     Choice choice;

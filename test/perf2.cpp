@@ -23,7 +23,7 @@ std::vector<uint32_t> generateInserts(impl::IndexedFile& indexedFile, time::Meas
     std::vector<uint32_t> keys;
     for(auto i=0u; i < n; i++){
         time::Measurement meas(std::cout, aggr, INSERT, false);
-        auto key = rand()%boundary;
+        auto key = random()%boundary;
         keys.push_back(key);
         indexedFile.insert(key, generateCarNumber());
     }
@@ -69,7 +69,7 @@ TEST_F(Experiment, updateExistingKeyChangeTest){
 TEST_F(Experiment, updateExistingKeySameTest){
     impl::IndexedFile indexedFile;
     static constexpr auto numOfOps = 100;
-    auto keys = generateInserts(indexedFile, aggr, 10000);
+    auto keys = generateInserts(indexedFile, aggr, 1000);
     for(auto i = 0u; i < numOfOps; i++){
         auto key = keys[random()%keys.size()];
         time::Measurement meas(std::cout, aggr, UPDATE, false);
@@ -80,7 +80,7 @@ TEST_F(Experiment, updateExistingKeySameTest){
 }
 
 
-TEST_F(Experiment, updateNonExistingTest){
+TEST_F(Experiment, updateNonExistingKeySameTest){
     impl::IndexedFile indexedFile;
     static constexpr auto numOfOps = 100;
     auto keys = generateInserts(indexedFile, aggr, 1000);
@@ -88,6 +88,18 @@ TEST_F(Experiment, updateNonExistingTest){
         auto key = random()%constants::MAX_RECORD_KEY;
         time::Measurement meas(std::cout, aggr, UPDATE, false);
         indexedFile.update(key, key, "BLABLA");
+    }
+    aggr.printReport();
+}
+
+TEST_F(Experiment, updateNonExistingKeyChangeTest){
+    impl::IndexedFile indexedFile;
+    static constexpr auto numOfOps = 100;
+    auto keys = generateInserts(indexedFile, aggr, 1000);
+    for(auto i = 0u; i < numOfOps; i++){
+        auto key = random()%constants::MAX_RECORD_KEY;
+        time::Measurement meas(std::cout, aggr, UPDATE, false);
+        indexedFile.update(key, random()%constants::MAX_RECORD_KEY, "BLABLA");
     }
     aggr.printReport();
 }
@@ -116,4 +128,26 @@ TEST_F(Experiment, removeNonExistingTest){
     aggr.printReport();
 }
 
+TEST_F(Experiment, findExistingTest){
+    impl::IndexedFile indexedFile;
+    static constexpr auto numOfOps = 100;
+    auto keys = generateInserts(indexedFile, aggr, 1000);
+    for(auto i = 0u; i < numOfOps; i++){
+        auto key = keys[random()%keys.size()];
+        time::Measurement meas(std::cout, aggr, GET, false);
+        EXPECT_NE(indexedFile.find(key), "");
+    }
+    aggr.printReport();
+}
 
+TEST_F(Experiment, findNonExistingTest){
+    impl::IndexedFile indexedFile;
+    static constexpr auto numOfOps = 100;
+    auto keys = generateInserts(indexedFile, aggr, 1000);
+    for(auto i = 0u; i < numOfOps; i++){
+        auto key = random()%constants::MAX_RECORD_KEY;
+        time::Measurement meas(std::cout, aggr, GET, false);
+        indexedFile.find(key);
+    }
+    aggr.printReport();
+}

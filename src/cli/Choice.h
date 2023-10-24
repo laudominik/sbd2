@@ -7,6 +7,7 @@ enum Operation {
     INSERT,
     UPDATE,
     REMOVE,
+    GET,
     REORGANISE,
     INORDER,
     EXIT

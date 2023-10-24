@@ -30,9 +30,10 @@ namespace sbd::time {
 
         void printReport(){
             std::cout << "$$$$$$$REPORTS$$$$$$$" << std::endl;
-            std::cout << "INSERT    : reads.avg " << avgReads(INSERT) << " writes.avg " << avgWrites(INSERT) << std::endl;
-            std::cout << "UPDATE    : reads.avg " << avgReads(UPDATE) << " writes.avg " << avgWrites(UPDATE) << std::endl;
-            std::cout << "REMOVE    : reads.avg " << avgReads(REMOVE) << " writes.avg " << avgWrites(REMOVE) << std::endl;
+            std::cout << "INSERT    : reads.avg " << avgReads(INSERT) << " writes.avg " << avgWrites(INSERT) << " io.avg " << avgReads(INSERT) + avgWrites(INSERT) << std::endl;
+            std::cout << "UPDATE    : reads.avg " << avgReads(UPDATE) << " writes.avg " << avgWrites(UPDATE) << " io.avg " << avgReads(UPDATE) + avgWrites(UPDATE) << std::endl;
+            std::cout << "REMOVE    : reads.avg " << avgReads(REMOVE) << " writes.avg " << avgWrites(REMOVE) << " io.avg " << avgReads(REMOVE) + avgWrites(REMOVE) << std::endl;
+            std::cout << "GET       : reads.avg " << avgReads(GET) << " writes.avg " << avgWrites(GET) << " io.avg " << avgReads(GET) + avgWrites(GET) << std::endl;
         }
 
     private:
@@ -48,20 +49,4 @@ namespace sbd::time {
         }
 
     };
-
-
-//    class MeasurementAggr {
-//    public:
-//        MeasurementAggr(std::ostream& in) : in(in), startTimestamp({ writeClock().get(), readClock().get()}) {};
-//        ~Measurement() {
-//            auto writes = writeClock().get() - startTimestamp.write;
-//            auto reads = readClock().get() - startTimestamp.read;
-//            in << "[Measurement] r: " << reads << " w: " << writes << " io(r+w): " << writes + reads << std::endl;
-//        }
-//    private:
-//        std::ostream& in;
-//        struct Timestamp {
-//            uint64_t write, read;
-//        } startTimestamp;
-//    };
 }
