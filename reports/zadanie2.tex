@@ -205,20 +205,64 @@ W następnym eksperymencie przeprowadzono 1000 losowych operacji INSERT dla ró�
 \end{center}
 TODO: wykres \\
 TODO: omówienie
-\subsection{Ilość operacji}
-W kolejnym eksperymencie wstawiono wygenerowano 1000 losowych rekordów, przyjęto $\alpha=0.5$ a następnie badano działanie różnych przypadków aktualizacji/usuwania.
+\subsection{Ilość operacji a $\alpha$}
+W kolejnym eksperymencie wstawiono wygenerowano 1000 losowych rekordów z kluczami $\in [0, 1000]$, sprawdzono złożoność dla wstawiania, a następnie badano średnią ilość odczytów/zapisów dla 100 operacji aktualizacji i usuwania (i ich różnych przypadków)
+w zależności od $\alpha$
 \begin{center}
-\begin{tabular}{ c c | c c | c}
- operacja & ilość operacji & średnia liczba zapisów & średnia liczba od czytów & średnia liczba operacji i/o \\ 
+\textbf{dla} $\alpha = 0.1$ \\
+\begin{tabular}{ c | c c | c}
+ operacja & średnia liczba zapisów & średnia liczba od czytów & średnia liczba operacji i/o \\ 
 \hline
- wstawianie & 1000 & ? & ? & ? \\  
- usuwanie ist. & 100 & ? & ? & ? \\
- usuwanie nieist. & 100 & ? & ? & ? \\
- aktualizowanie ist. & 100 & ? & ? & ?\\
- aktualizowanie nieist. & 100 & ? & ?  & ?\\
+ wstawianie & ? & ? & ? \\  
+ \hline 
+ \textbf{rekord istnieje}\\
+ aktualizacja (inny klucz) & ? & ? & ? \\
+ aktualizacja (ten sam k.) & ? & ? & ? \\
+ usunięcie & ? & ? & ? \\
+ \hline
+ \textbf{rekord nie istnieje} \\
+ aktualizacja \\
+ usunięcie \\
+\hline \hline
 \end{tabular}
 \end{center}
-TODO: wykres \\
+\begin{center}
+\textbf{dla} $\alpha = 0.3$ \\
+\begin{tabular}{ c | c c | c}
+ operacja & średnia liczba zapisów & średnia liczba od czytów & średnia liczba operacji i/o \\ 
+\hline
+ wstawianie & ? & ? & ? \\  
+ \hline 
+ \textbf{rekord istnieje}\\
+ aktualizacja (inny klucz) & ? & ? & ? \\
+ aktualizacja (ten sam k.) & ? & ? & ? \\
+ usunięcie & ? & ? & ? \\
+ \hline
+ \textbf{rekord nie istnieje} \\
+ aktualizacja \\
+ usunięcie  \\
+\hline \hline
+\end{tabular}
+\end{center}
+\begin{center}
+\textbf{dla} $\alpha = 0.5$ \\
+\begin{tabular}{ c | c c | c}
+ operacja & średnia liczba zapisów & średnia liczba od czytów & średnia liczba operacji i/o \\ 
+\hline
+ wstawianie & ? & ? & ? \\  
+ \hline 
+ \textbf{rekord istnieje}\\
+ aktualizacja (inny klucz) & ? & ? & ? \\
+ aktualizacja (ten sam k.) & ? & ? & ? \\
+ usunięcie & ? & ? & ? \\
+ \hline
+ \textbf{rekord nie istnieje} \\
+ aktualizacja \\
+ usunięcie \\
+\hline \hline 
+\end{tabular}
+\end{center}
+
 TODO: omówienie
 \section{Podsumowanie}
 

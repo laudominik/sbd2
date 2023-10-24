@@ -22,5 +22,5 @@ namespace sbd::constants {
     static constexpr auto INDEX_BLOCKING_FACTOR = PAGE_SIZE/HEADER_SIZE;
     static constexpr auto INCORRECT_RECORD_KEY = 0xFFFFFFFFull;
     static constexpr auto MAX_RECORD_KEY = 0x0FFFFFFFull;
-    static constexpr auto REORGANISATION_ALPHA = 0.9;
+    static constexpr auto REORGANISATION_ALPHA = 0.5;
 }

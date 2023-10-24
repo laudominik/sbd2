@@ -19,13 +19,16 @@ protected:
     time::MeasurementAggr aggr;
 };
 
-void generateInserts(impl::IndexedFile& indexedFile, time::MeasurementAggr& aggr, size_t n){
+std::vector<uint32_t> generateInserts(impl::IndexedFile& indexedFile, time::MeasurementAggr& aggr, size_t n, uint32_t boundary = constants::MAX_RECORD_KEY){
+    std::vector<uint32_t> keys;
     for(auto i=0u; i < n; i++){
         time::Measurement meas(std::cout, aggr, INSERT, false);
-        indexedFile.insert(rand()%constants::MAX_RECORD_KEY, generateCarNumber());
+        auto key = rand()%boundary;
+        keys.push_back(key);
+        indexedFile.insert(key, generateCarNumber());
     }
+    return keys;
 }
-
 
 TEST_F(Experiment, sizesAlphaTest){
     std::cout << "[INFO] alpha=" << constants::REORGANISATION_ALPHA << std::endl;
@@ -47,21 +50,70 @@ TEST_F(Experiment, sizesNTest){
 TEST_F(Experiment, insertPerfTest){
     impl::IndexedFile indexedFile;
     generateInserts(indexedFile, aggr, 1000);
+
     aggr.printReport();
 }
 
-TEST_F(Experiment, updateExistingTest){
-
+TEST_F(Experiment, updateExistingKeyChangeTest){
+    impl::IndexedFile indexedFile;
+    static constexpr auto numOfOps = 100;
+    auto keys = generateInserts(indexedFile, aggr, 1000);
+    for(auto i = 0u; i < numOfOps; i++){
+        auto key = keys[random()%keys.size()];
+        time::Measurement meas(std::cout, aggr, UPDATE, false);
+        indexedFile.update(key, random()%constants::MAX_RECORD_KEY, "BLABLA");
+    }
+    aggr.printReport();
 }
 
-TEST_F(Experiment, updateNonExistingTest){
+TEST_F(Experiment, updateExistingKeySameTest){
+    impl::IndexedFile indexedFile;
+    static constexpr auto numOfOps = 100;
+    auto keys = generateInserts(indexedFile, aggr, 10000);
+    for(auto i = 0u; i < numOfOps; i++){
+        auto key = keys[random()%keys.size()];
+        time::Measurement meas(std::cout, aggr, UPDATE, false);
+        indexedFile.update(key, key, "BLABLA");
+    }
+    aggr.printReport();
+    indexedFile.inorderPrint(std::cout);
+}
 
+
+TEST_F(Experiment, updateNonExistingTest){
+    impl::IndexedFile indexedFile;
+    static constexpr auto numOfOps = 100;
+    auto keys = generateInserts(indexedFile, aggr, 1000);
+    for(auto i = 0u; i < numOfOps; i++){
+        auto key = random()%constants::MAX_RECORD_KEY;
+        time::Measurement meas(std::cout, aggr, UPDATE, false);
+        indexedFile.update(key, key, "BLABLA");
+    }
+    aggr.printReport();
 }
 
 TEST_F(Experiment, removeExistingTest){
-
+    impl::IndexedFile indexedFile;
+    static constexpr auto numOfOps = 100;
+    auto keys = generateInserts(indexedFile, aggr, 1000);
+    for(auto i = 0u; i < numOfOps; i++){
+        auto key = keys[random()%keys.size()];
+        time::Measurement meas(std::cout, aggr, REMOVE, false);
+        indexedFile.remove(key);
+    }
+    aggr.printReport();
 }
 
 TEST_F(Experiment, removeNonExistingTest){
-
+    impl::IndexedFile indexedFile;
+    static constexpr auto numOfOps = 100;
+    auto keys = generateInserts(indexedFile, aggr, 1000);
+    for(auto i = 0u; i < numOfOps; i++){
+        auto key = random()%constants::MAX_RECORD_KEY;
+        time::Measurement meas(std::cout, aggr, REMOVE, false);
+        indexedFile.remove(key);
+    }
+    aggr.printReport();
 }
+
+
