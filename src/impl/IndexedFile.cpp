@@ -166,6 +166,9 @@ namespace sbd::impl {
                 posInData = currentRecord.getPtr() * constants::DATA_RECORD_PER_PAGE;
                 left = mid + 1;
                 foundKey = currentRecord.getKey();
+                if(currentRecord.getKey() == key){
+                  break;
+                }
             } else {
                 if(right == 0) break;
                 if(mid == 0) break;
@@ -383,8 +386,17 @@ namespace sbd::impl {
                 }
                 data.insert(posInData + constants::DATA_RECORD_PER_PAGE - 1, {constants::INCORRECT_RECORD_KEY, constants::INCORRECT_RECORD_KEY, ""});
 
+                bool empty = true;
+                for(auto i = posOnPage; i < constants::DATA_RECORD_PER_PAGE; i++){
+                    if(data.get(i+posInData).getKey() != constants::INCORRECT_RECORD_KEY){
+                        empty = false;
+                    }
+                }
                 // update index
-                index.insert(posInIndex, {data.get(posInData).getKey(), index.get(posInIndex).getPtr()});
+               if(!empty){
+                    index.insert(posInIndex, {data.get(posInData).getKey(), index.get(posInIndex).getPtr()});
+                }
+
                 deletedRecords++;
                 return true;
             } else {

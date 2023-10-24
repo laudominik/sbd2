@@ -64,6 +64,7 @@ TEST_F(Experiment, updateExistingKeyChangeTest){
         indexedFile.update(key, random()%constants::MAX_RECORD_KEY, "BLABLA");
     }
     aggr.printReport();
+    indexedFile.inorderPrint(std::cout);
 }
 
 TEST_F(Experiment, updateExistingKeySameTest){
@@ -114,6 +115,7 @@ TEST_F(Experiment, removeExistingTest){
         indexedFile.remove(key);
     }
     aggr.printReport();
+    indexedFile.inorderPrint(std::cout);
 }
 
 TEST_F(Experiment, removeNonExistingTest){
@@ -126,6 +128,7 @@ TEST_F(Experiment, removeNonExistingTest){
         indexedFile.remove(key);
     }
     aggr.printReport();
+    indexedFile.inorderPrint(std::cout);
 }
 
 TEST_F(Experiment, findExistingTest){
@@ -136,7 +139,7 @@ TEST_F(Experiment, findExistingTest){
         auto key = keys[random()%keys.size()];
         time::Measurement meas(std::cout, aggr, GET, false);
         EXPECT_NE(indexedFile.find(key), "");
-    }
+        }
     aggr.printReport();
 }
 

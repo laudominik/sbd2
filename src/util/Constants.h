@@ -1,7 +1,7 @@
 #pragma once
 
 #define PREVIEW
-#undef PREVIEW
+//#undef PREVIEW
 
 namespace sbd::constants {
     static constexpr auto INDEX_FILE = "index";
